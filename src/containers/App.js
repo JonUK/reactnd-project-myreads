@@ -36,7 +36,10 @@ export default class BooksApp extends Component {
 
     handleSearch(term) {
         BooksAPI.search(term, 20).then((searchResults) => {
-            if (searchResults.error) return;
+            // clear the book array from the state if there are no results from the search.
+            if (searchResults.error) {
+                return this.setState({search : []})
+            }
 
             this.setState(state => {
                 // create a new array called mergedBooks
@@ -48,6 +51,8 @@ export default class BooksApp extends Component {
                     // overwrite the search result shelf IF book exists
                     if (existingBook) {
                         searchResult.shelf = existingBook.shelf
+                    } else {
+                        searchResult.shelf = 'none';
                     }
 
                     // add the searchResult, modified or not, to the mergedBooks array
@@ -85,7 +90,7 @@ export default class BooksApp extends Component {
                 <div className="app">
                     <Route exact path="/" render={() => (
                         <div className="list-books">
-                            <Title/>
+                            <Title title="MyReads"/>
                             <Content
                                 currentlyReading={currentlyReading}
                                 wantToRead={wantToRead}
