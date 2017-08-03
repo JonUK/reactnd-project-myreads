@@ -3,14 +3,14 @@ import { Book } from './Book';
 import '../containers/App.css';
 import PropTypes from 'prop-types';
 
-export const SearchResult = props => {
+export const SearchResult = (props) => {
   if (!props.books) {
     return <div>Loading...</div>;
   }
 
-  const bookList = props.books.map(book => {
-    return <Book key={book.id} book={book} onMoveBook={props.onMoveBook} />;
-  });
+  const bookList = props.books.map(book =>
+    <Book key={book.id} book={book} onMoveBook={props.onMoveBook} />,
+  );
 
   return (
     <div className="search-books-results">

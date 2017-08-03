@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
 import * as BooksAPI from '../BooksAPI';
 import { Title } from '../components/Title';
 import { Search } from '../components/Search';
 import { Content } from '../components/Content';
-import { SearchBar } from './SearchBar';
-import { SearchResult } from '../components/SearchResult';
+import { SearchBar } from '../components/SearchBar';
+import SearchResult from '../components/SearchResult';
 import './App.css';
-import { BrowserRouter, Route } from 'react-router-dom';
 
 export default class BooksApp extends Component {
   constructor(props) {
@@ -22,6 +22,12 @@ export default class BooksApp extends Component {
     this.handleSearch = _.debounce(this.handleSearch, 300);
   }
 
+  componentDidMount() {
+    BooksAPI.getAll().then((books) => {
+      this.setState({ books });
+    });
+  }
+
   handleMoveBook(book, shelf) {
     if (book.shelf !== shelf) {
       BooksAPI.update(book, shelf).then(() => {
@@ -34,19 +40,17 @@ export default class BooksApp extends Component {
   }
 
   handleSearch(term) {
-    BooksAPI.search(term, 20).then(searchResults => {
+    BooksAPI.search(term, 20).then((searchResults) => {
       // clear the book array from the state if there are no results from the search.
       if (searchResults.error) {
         return this.setState({ search: [] });
       }
 
-      this.setState(state => {
+      this.setState((state) => {
         // create a new array called mergedBooks
-        const mergedBooks = searchResults.map(searchResult => {
+        const mergedBooks = searchResults.map((searchResult) => {
           // grab the existing book from your library if it exists
-          const existingBook = state.books.find(
-            book => book.id === searchResult.id
-          );
+          const existingBook = state.books.find(book => book.id === searchResult.id);
 
           // overwrite the search result shelf IF book exists
           if (existingBook) {
@@ -74,19 +78,9 @@ export default class BooksApp extends Component {
     }
   }
 
-  componentDidMount() {
-    BooksAPI.getAll().then(books => {
-      this.setState({ books });
-    });
-  }
-
   render() {
-    const currentlyReading = this.state.books.filter(
-      book => book.shelf === 'currentlyReading'
-    );
-    const wantToRead = this.state.books.filter(
-      book => book.shelf === 'wantToRead'
-    );
+    const currentlyReading = this.state.books.filter(book => book.shelf === 'currentlyReading');
+    const wantToRead = this.state.books.filter(book => book.shelf === 'wantToRead');
     const readAlready = this.state.books.filter(book => book.shelf === 'read');
 
     return (
@@ -96,7 +90,7 @@ export default class BooksApp extends Component {
             exact
             path="/"
             render={() =>
-              <div className="list-books">
+              (<div className="list-books">
                 <Title title="MyReads" />
                 <Content
                   currentlyReading={currentlyReading}
@@ -105,23 +99,20 @@ export default class BooksApp extends Component {
                   onMoveBook={this.handleMoveBook}
                 />
                 <Search />
-              </div>}
+              </div>)}
           />
           <Route
             exact
             path="/search"
             render={() =>
-              <div className="search-books">
+              (<div className="search-books">
                 <SearchBar
                   onSearch={term => this.handleSearch(term)}
                   term={this.state.term}
                   onInputChange={this.handleInputChange}
                 />
-                <SearchResult
-                  books={this.state.search}
-                  onMoveBook={this.handleMoveBook}
-                />
-              </div>}
+                <SearchResult books={this.state.search} onMoveBook={this.handleMoveBook} />
+              </div>)}
           />
         </div>
       </BrowserRouter>
